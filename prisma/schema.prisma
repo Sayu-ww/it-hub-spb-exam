@@ -7,10 +7,54 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-
+enum UserRole {
+  USER
+  ADMIN
 }
 
-model Entry {
+enum CoursePaymentMethod {
+  CASH
+  PHONE_TRANSFER
+}
 
+enum ApplicationStatus {
+  NEW
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  login     String    @unique
+  password  String
+  fullname  String
+  phone     String
+  email     String    @unique
+  role      UserRole  @default(USER)
+  createdAt DateTime  @default(now())
+  applications Application[]
+  reviews   Review[]
+}
+
+model Application {
+  id             Int                 @id @default(autoincrement())
+  userId         Int
+  course         String
+  startDate      String
+  paymentMethod  CoursePaymentMethod @default(CASH)
+  status         ApplicationStatus   @default(NEW)
+  createdAt      DateTime            @default(now())
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviews        Review[]
+}
+
+model Review {
+  id            Int         @id @default(autoincrement())
+  applicationId Int
+  userId        Int
+  rating        Int
+  text          String
+  createdAt     DateTime    @default(now())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
